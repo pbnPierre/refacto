@@ -17,6 +17,12 @@ class TemplateManager
 
     private function computeText($text, array $data)
     {
+        $affectedEntities = $this->getAffectedEntitiesAndData($text);
+
+        return $this->replaceTokens($text, $affectedEntities, $data);
+    }
+
+    protected function replaceTokens($text, array $affectedEntities, array $data) {
         $APPLICATION_CONTEXT = ApplicationContext::getInstance();
 
         $quote = (isset($data['quote']) and $data['quote'] instanceof Quote) ? $data['quote'] : null;
@@ -69,5 +75,19 @@ class TemplateManager
         }
 
         return $text;
+    }
+
+    protected function getAffectedEntitiesAndData($text) {
+        return [
+            'user' => [
+                'first_name',
+            ],
+            'quote' => [
+                'destination_name',
+                'destination_link',
+                'summary',
+                'summary_html'
+            ]
+        ];
     }
 }
