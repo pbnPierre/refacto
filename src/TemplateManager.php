@@ -60,17 +60,16 @@ class TemplateManager
                         $quoteEntity->id
                     );
                 }
-                
+
                 $text = str_replace('[quote:destination_link]', $destinationLink, $text);
             }
         }
-        /*
-         * USER
-         * [user:*]
-         */
-        $_user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
-        if($_user) {
-            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(mb_strtolower($_user->firstname)), $text);
+
+        $currentUser  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
+        if($currentUser) {
+            if ($this->contains('user', 'first_name', $text)) {
+                $text = str_replace('[user:first_name]', ucfirst(mb_strtolower($currentUser->firstname)), $text);
+            }
         }
 
         return $text;
