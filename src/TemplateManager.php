@@ -33,31 +33,27 @@ class TemplateManager
             $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
             $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
 
-            if(strpos($text, '[quote:destination_link]') !== false){
+            if ($this->contains('quote', 'destination_link', $text)) {
                 $destination = DestinationRepository::getInstance()->getById($quote->destinationId);
             }
 
-            $containsSummaryHtml = strpos($text, '[quote:summary_html]');
-            $containsSummary     = strpos($text, '[quote:summary]');
-
-            if ($containsSummaryHtml !== false || $containsSummary !== false) {
-                if ($containsSummaryHtml !== false) {
-                    $text = str_replace(
-                        '[quote:summary_html]',
-                        Quote::renderHtml($_quoteFromRepository),
-                        $text
-                    );
-                }
-                if ($containsSummary !== false) {
-                    $text = str_replace(
-                        '[quote:summary]',
-                        Quote::renderText($_quoteFromRepository),
-                        $text
-                    );
-                }
+            if ($this->contains('quote', 'summary_html', $text)) {
+                $text = str_replace(
+                    '[quote:summary_html]',
+                    Quote::renderHtml($_quoteFromRepository),
+                    $text
+                );
             }
-
-            (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+            if ($this->contains('quote', 'summary', $text)) {
+                $text = str_replace(
+                    '[quote:summary]',
+                    Quote::renderText($_quoteFromRepository),
+                    $text
+                );
+            }
+            if ($this->contains('quote', 'destination_name', $text)) {
+                $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+            }
         }
 
         if (isset($destination))
@@ -75,6 +71,10 @@ class TemplateManager
         }
 
         return $text;
+    }
+
+    protected function contains($entity, $value, $text) {
+        return false !== strpos($text, sprintf('[%s:%s]', $entity, $value));
     }
 
     protected function getAffectedEntitiesAndData($text) {
