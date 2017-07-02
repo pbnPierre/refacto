@@ -23,53 +23,60 @@ class TemplateManager
     }
 
     protected function replaceTokens($text, array $affectedEntities, array $data) {
+        $quote = isset($data['quote'])?$data['quote']:null;
+        if (isset($affectedEntities['quote']) && $quote instanceof Quote) {
+            $text = $this->replaceQuoteRelatedValues($text, $quote);
+        }
         $APPLICATION_CONTEXT = ApplicationContext::getInstance();
-
-        $quote = (isset($data['quote']) and $data['quote'] instanceof Quote) ? $data['quote'] : null;
-
-        if ($quote)
-        {
-            $quoteEntity = QuoteRepository::getInstance()->getById($quote->id);
-            $siteEntity = SiteRepository::getInstance()->getById($quote->siteId);
-            $destinationEntity = DestinationRepository::getInstance()->getById($quote->destinationId);
-
-            if ($this->contains('quote', 'summary_html', $text)) {
-                $text = str_replace(
-                    '[quote:summary_html]',
-                    Quote::renderHtml($quoteEntity),
-                    $text
-                );
-            }
-            if ($this->contains('quote', 'summary', $text)) {
-                $text = str_replace(
-                    '[quote:summary]',
-                    Quote::renderText($quoteEntity),
-                    $text
-                );
-            }
-            if ($this->contains('quote', 'destination_name', $text)) {
-                $text = str_replace('[quote:destination_name]',$destinationEntity->countryName,$text);
-            }
-            if ($this->contains('quote', 'destination_link', $text)) {
-                $destinationLink = '';
-                if ($destinationEntity && $siteEntity && $quoteEntity) {
-                    $destinationLink = sprintf(
-                        '%s/%s/quote/%s',
-                        $siteEntity->url,
-                        $destinationEntity->countryName,
-                        $quoteEntity->id
-                    );
-                }
-
-                $text = str_replace('[quote:destination_link]', $destinationLink, $text);
-            }
+        $user = isset($data['user'])?$data['user']:$APPLICATION_CONTEXT->getCurrentUser();
+        if (isset($affectedEntities['user']) && $user instanceof User) {
+            $text = $this->replaceUserRelatedValues($text, $user);
         }
 
-        $currentUser  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
-        if($currentUser) {
-            if ($this->contains('user', 'first_name', $text)) {
-                $text = str_replace('[user:first_name]', ucfirst(mb_strtolower($currentUser->firstname)), $text);
+        return $text;
+    }
+
+    protected function replaceQuoteRelatedValues($text, Quote $quote) {
+        $siteEntity = SiteRepository::getInstance()->getById($quote->siteId);
+        $destinationEntity = DestinationRepository::getInstance()->getById($quote->destinationId);
+
+        if ($this->contains('quote', 'summary_html', $text)) {
+            $text = str_replace(
+                '[quote:summary_html]',
+                Quote::renderHtml($quote),
+                $text
+            );
+        }
+        if ($this->contains('quote', 'summary', $text)) {
+            $text = str_replace(
+                '[quote:summary]',
+                Quote::renderText($quote),
+                $text
+            );
+        }
+        if ($this->contains('quote', 'destination_name', $text)) {
+            $text = str_replace('[quote:destination_name]',$destinationEntity->countryName,$text);
+        }
+        if ($this->contains('quote', 'destination_link', $text)) {
+            $destinationLink = '';
+            if ($destinationEntity && $siteEntity && $quote) {
+                $destinationLink = sprintf(
+                    '%s/%s/quote/%s',
+                    $siteEntity->url,
+                    $destinationEntity->countryName,
+                    $quote->id
+                );
             }
+
+            $text = str_replace('[quote:destination_link]', $destinationLink, $text);
+        }
+
+        return $text;
+    }
+
+    protected function replaceUserRelatedValues($text, User $user) {
+        if ($this->contains('user', 'first_name', $text)) {
+            $text = str_replace('[user:first_name]', ucfirst(mb_strtolower($user->firstname)), $text);
         }
 
         return $text;
