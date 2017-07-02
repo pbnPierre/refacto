@@ -41,3 +41,20 @@ What do we expect from you:
 
 **Good luck!**
 
+1. Cool there is unit tests let's read it to see how we use this `TemplateManager`
+2. Okay I install *phpunit* and run these tests -> tests passed that's cool. (I was expecting `DataProviders` in the test to cover a lot of different cases but that will do the job)
+3. Let's read this `TemplateManager` and see what basic operation it must do
+4. Okay it must found [entity:value] tokens to replace them. So a good way wood be to split these two operations 
+5. I have some parts I must not modify, let's see them and see how the code is arranged.
+6. Oh a `Singleton` Trait, I love it :)
+7. Okay basicly all the Repository parts are forbiden but i don't feel the need to modifiy other classes than `TemplateManager` for now.
+8. Let's go "On fout les mais dans le camboui"
+9. `getTemplateComputed` seems quite understandable, let's focus on compute Text.
+10. My approach would be first get all couples [entity:field] that need to be modified and then replace them. So let's do these functions
+11. Let's hardcode for now and i'll try to process using *Regex* later if i have time
+12. I don't like `contains***` variables so let's extract a function and let's replace unreadable tests
+13. fuck I commit instead of lanching my phpunit ammend is my friend
+14. wtf with `$destinationOfQuote` and `$destination` vars and $usefulObject. let's clean this mess
+15. I forgot to touch the user part, let's go
+16. There is clearly 2 part in `replacetokens` *Quote* and *User.* let's split in two function
+17. Time is up :( to go further i will use regex to find [entity:value] in `getAffectedEntitiesAndData` and normalize attribute replace in other classes that will have the logic to render html or pure text or url when needed.
