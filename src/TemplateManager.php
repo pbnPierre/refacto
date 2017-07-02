@@ -29,38 +29,41 @@ class TemplateManager
 
         if ($quote)
         {
-            $_quoteFromRepository = QuoteRepository::getInstance()->getById($quote->id);
-            $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
-            $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
-
-            if ($this->contains('quote', 'destination_link', $text)) {
-                $destination = DestinationRepository::getInstance()->getById($quote->destinationId);
-            }
+            $quoteEntity = QuoteRepository::getInstance()->getById($quote->id);
+            $siteEntity = SiteRepository::getInstance()->getById($quote->siteId);
+            $destinationEntity = DestinationRepository::getInstance()->getById($quote->destinationId);
 
             if ($this->contains('quote', 'summary_html', $text)) {
                 $text = str_replace(
                     '[quote:summary_html]',
-                    Quote::renderHtml($_quoteFromRepository),
+                    Quote::renderHtml($quoteEntity),
                     $text
                 );
             }
             if ($this->contains('quote', 'summary', $text)) {
                 $text = str_replace(
                     '[quote:summary]',
-                    Quote::renderText($_quoteFromRepository),
+                    Quote::renderText($quoteEntity),
                     $text
                 );
             }
             if ($this->contains('quote', 'destination_name', $text)) {
-                $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+                $text = str_replace('[quote:destination_name]',$destinationEntity->countryName,$text);
+            }
+            if ($this->contains('quote', 'destination_link', $text)) {
+                $destinationLink = '';
+                if ($destinationEntity && $siteEntity && $quoteEntity) {
+                    $destinationLink = sprintf(
+                        '%s/%s/quote/%s',
+                        $siteEntity->url,
+                        $destinationEntity->countryName,
+                        $quoteEntity->id
+                    );
+                }
+                
+                $text = str_replace('[quote:destination_link]', $destinationLink, $text);
             }
         }
-
-        if (isset($destination))
-            $text = str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destination->countryName . '/quote/' . $_quoteFromRepository->id, $text);
-        else
-            $text = str_replace('[quote:destination_link]', '', $text);
-
         /*
          * USER
          * [user:*]
